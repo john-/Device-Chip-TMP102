@@ -4,8 +4,6 @@ use strict;
 use warnings;
 
 use Device::Chip::Adapter;
-
-use FindBin::libs;
 use Device::Chip::TMP102;
 
 use feature 'say';
@@ -17,12 +15,6 @@ my $sensor = Device::Chip::TMP102->new;
 
 $sensor->mount_from_paramstr(
     Device::Chip::Adapter->new_from_description($ADAPTER), $MOUNTPARAMS, )->get;
-
-
-#$ina->change_config( STRT => 1 )->get;
-
-#my %config = %{ $ina->read_config->get };
-#say "STRT is now " . $config{STRT};
 
 my $temp = $sensor->read_temp->get;
 print "Temp:\n";
