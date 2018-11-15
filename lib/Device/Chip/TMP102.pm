@@ -18,7 +18,9 @@ use utf8;
 
 our $VERSION = '0.01';
 
-use Data::Bitfield qw( bitfield boolfield );
+use Data::Bitfield qw( bitfield boolfield enumfield );
+
+use Data::Dumper;
 
 =encoding UTF-8
 
@@ -79,8 +81,64 @@ L<Future> instances.
 =cut
 
 use constant {
-    REG_TEMP => 0x00,    # R
+    REG_TEMP   => 0x00,    # R
+    REG_CONFIG => 0x01,    # R/W
 };
+
+bitfield CONFIG =>
+    SD  => boolfield(0),
+    TM  => boolfield(1),
+    POL => boolfield(2),
+#    F   => enumfield(3, qw( 1 2 4 6 )),
+    F0  => boolfield(3),
+    F1  => boolfield(4),
+    R0  => boolfield(5),
+    R1  => boolfield(6),
+    OS  => boolfield(7),
+    EM  => boolfield(12),
+    AL  => boolfield(13),
+    CR0 => boolfield(14),
+    CR1 => boolfield(15);
+
+=head2 read_config
+
+   $config = $chip->read_config->get
+
+Reads and returns the current chip configuration as a C<HASH> reference.
+
+=cut
+
+sub read_config
+{
+    my $self = shift;
+
+    $self->cached_read_reg( REG_CONFIG, 1 )->then( sub {
+	my ( $bytes ) = @_;
+	Future->done( $self->{config} = { unpack_CONFIG( unpack "S", $bytes ) } );
+    });
+}
+
+=head2 change_config
+
+   $chip->change_config( %config )->get
+
+Changes the configuration. Any field names not mentioned will be preserved.
+
+=cut
+
+sub change_config
+{
+    my $self = shift;
+    my %changes = @_;
+
+    ( defined $self->{config} ? Future->done( $self->{config} ) :
+      $self->read_config )->then( sub {
+	  my %config = ( %{ $_[0] }, %changes );
+
+	  undef $self->{config}; # invalidate the cache
+	  $self->write_reg( REG_CONFIG, pack "S", pack_CONFIG( %config ) );
+				  });
+}
 
 =head2 read_temp
 
@@ -94,7 +152,7 @@ sub read_temp {
     my $self = shift;
 
     $self->read_reg( REG_TEMP, 1 )->then(
-        sub {
+        sub {  # this code copied from Device::TMP102 by Alex White
             my ($value) = unpack "s<", $_[0];
 
 	    my $lsb = ( $value & 0xff00 );
