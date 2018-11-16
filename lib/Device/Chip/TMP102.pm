@@ -20,8 +20,6 @@ our $VERSION = '0.01';
 
 use Data::Bitfield qw( bitfield boolfield enumfield );
 
-use Data::Dumper;
-
 =encoding UTF-8
 
 =head1 NAME

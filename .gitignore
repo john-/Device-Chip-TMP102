@@ -18,7 +18,6 @@ Build.bat
 /_eumm/
 /*.gz
 /Makefile
-/Makefile.PL
 /Makefile.old
 /MANIFEST.bak
 /pm_to_blib
