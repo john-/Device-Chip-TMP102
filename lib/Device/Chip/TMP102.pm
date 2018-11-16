@@ -88,19 +88,29 @@ bitfield CONFIG =>
     TM  => boolfield(1),
     POL => boolfield(2),
     F   => enumfield(3, qw( 1 2 4 6 )),
-    R0  => boolfield(5),
-    R1  => boolfield(6),
+    R0  => boolfield(5),   # R
+    R1  => boolfield(6),   # R
     OS  => boolfield(7),
     EM  => boolfield(12),
     AL  => boolfield(13),
-    CR0 => boolfield(14),
-    CR1 => boolfield(15);
+    CR  => enumfield(14, qw( 0.25Hz 1Hz 4Hz 8hz ));
 
 =head2 read_config
 
    $config = $chip->read_config->get
 
 Reads and returns the current chip configuration as a C<HASH> reference.
+
+   SD  => 0 | 1
+   TM  => 0 | 1
+   POL => 0 | 1
+   F   => "1" | "2" | "4" | "6"
+   R0  => 0 | 1  (read only)
+   R1  => 0 | 1  (read only)
+   OS  => 0 | 1
+   EM  => 0 | 1
+   AL  => 0 | 1
+   CR  => "0.25Hz" | "1Hz" | "4Hz" | "8Hz"
 
 =cut
 

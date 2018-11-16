@@ -51,6 +51,17 @@ L<Future> instances.
 
 Reads and returns the current chip configuration as a C<HASH> reference.
 
+   SD  => 0 | 1
+   TM  => 0 | 1
+   POL => 0 | 1
+   F   => "1" | "2" | "4" | "6"
+   R0  => 0 | 1  (read only)
+   R1  => 0 | 1  (read only)
+   OS  => 0 | 1
+   EM  => 0 | 1
+   AL  => 0 | 1
+   CR  => "0.25Hz" | "1Hz" | "4Hz" | "8Hz"
+
 
 =cut
 

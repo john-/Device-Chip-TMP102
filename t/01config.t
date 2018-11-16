@@ -19,7 +19,7 @@ $chip->mount(
     $adapter->expect_write_then_read( "\x01", 2 )
        ->returns( "\x60\xA0" );
 
-    is_deeply( $chip->read_config->get,
+    is_deeply( $chip->read_config->get,  # values represent power on state
        {
 	  SD         => '',
 	  TM         => '',
@@ -30,8 +30,7 @@ $chip->mount(
 	  OS         => '',
 	  EM         => '',
 	  AL         => 1,
-	  CR0        => '',
-	  CR1        => 1,
+	  CR         => '4Hz',
       },
       '->read_config returns config' );
 
