@@ -1,5 +1,8 @@
 use ExtUtils::MakeMaker;
 
+my $preop =
+    'perldoc -uT $(VERSION_FROM) | tee $(DISTVNAME)/README.pod > README.pod';
+
 WriteMakefile(
     NAME            => 'Device::Chip::TMP102',
     VERSION_FROM    => 'lib/Device/Chip/TMP102.pm',
@@ -14,6 +17,9 @@ WriteMakefile(
     TEST_REQUIRES => {
         'Test::Device::Chip::Adapter' => 0,
         'Test::More'                  => '0.88',    # done_testing
+    },
+    dist                => {
+	PREOP => $preop,
     },
     
 );
