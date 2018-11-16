@@ -69,7 +69,7 @@ sub I2C_options {
     return (
         %params,    # this needs to fixed with resolution of 127570
         addr        => $addr,
-        max_bitrate => 400E3,    # TODO:  check if this is from datasheet
+        max_bitrate => 400E3,
     );
 }
 
@@ -89,9 +89,7 @@ bitfield CONFIG =>
     SD  => boolfield(0),
     TM  => boolfield(1),
     POL => boolfield(2),
-#    F   => enumfield(3, qw( 1 2 4 6 )),
-    F0  => boolfield(3),
-    F1  => boolfield(4),
+    F   => enumfield(3, qw( 1 2 4 6 )),
     R0  => boolfield(5),
     R1  => boolfield(6),
     OS  => boolfield(7),

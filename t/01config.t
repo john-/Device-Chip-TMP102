@@ -17,16 +17,14 @@ $chip->mount(
 # ->read_config
 {
     $adapter->expect_write_then_read( "\x01", 2 )
-       ->returns( "\xA0\x60" );
+       ->returns( "\x60\xA0" );
 
     is_deeply( $chip->read_config->get,
        {
 	  SD         => '',
 	  TM         => '',
 	  POL        => '',
-	  #	  F          => 1,
-	  F0         => 0,
-	  F1         => 1,
+	  F          => 1,
 	  R0         => 1,
 	  R1         => 1,
 	  OS         => '',

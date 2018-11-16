@@ -7,8 +7,6 @@ use Device::Chip::Adapter;
 use FindBin::libs;
 use Device::Chip::TMP102;
 
-use Data::Dumper;
-
 use feature 'say';
 
 my $ADAPTER     = "LinuxKernel";
@@ -21,16 +19,16 @@ $sensor->mount_from_paramstr(
 
 my $config = $sensor->read_config->get;
 
-#$sensor->change_config(
-#    F => 4,
-#)->get;
+$sensor->change_config(
+    F => 4,
+)->get;
 
-#$config = $sensor->read_config->get;
+$config = $sensor->read_config->get;
 
-say Dumper($config);
+say "config changed and F now $config->{F}";
 
 my $temp = $sensor->read_temp->get;
-print "Temp:\n";
+say "Temp:";
 printf ( "\t%2.2f C\n", $temp );
 printf ( "\t%2.2f F\n", $temp * 1.8 + 32 );
 
