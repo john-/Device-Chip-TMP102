@@ -150,7 +150,7 @@ sub change_config
 
 =head2 read_temp
 
-   $duty = $chip->read_temp->get
+   $temp = $chip->read_temp->get
 
 Returns the temperature in degrees Celsius.
 
@@ -168,11 +168,27 @@ sub read_temp {
     );
 }
 
+=head2 write_temp_low
+
+   $chip->read_temp_low( $temp )->get
+
+Changes the low temperature threshold in degrees Celsius.
+
+=cut
+
 sub write_temp_low {
     my ($self, $temp) = @_;
 
     $self->write_reg( REG_T_LOW, pack "s>", $self->_temp_to_bytes($temp) );
 }
+
+=head2 read_temp_low
+
+   $temp = $chip->read_temp_low->get
+
+Returns the low temperature threshold in degrees Celsius.
+
+=cut
 
 sub read_temp_low {
     my $self = shift;
@@ -185,11 +201,27 @@ sub read_temp_low {
     );
 }
 
+=head2 write_temp_high
+
+   $chip->write_temp_high( $temp )->get
+
+Changes the high temperature threshold in degrees Celsius.
+
+=cut
+
 sub write_temp_high {
     my ($self, $temp) = @_;
 
     $self->write_reg( REG_T_HIGH, pack "s>", $self->_temp_to_bytes($temp) );
 }
+
+=head2 read_temp_high
+
+   $temp = $chip->read_temp_high->get
+
+Returns the high temperature threshold in degrees Celsius.
+
+=cut
 
 sub read_temp_high {
     my $self = shift;
