@@ -28,7 +28,7 @@ my $config = $sensor->read_config->get;
 #say "config changed and F now $config->{F}";
 
 $sensor->change_config(
-    EM => 0,
+    EM => 1,
 )->get;
 
 $config = $sensor->read_config->get;
@@ -40,18 +40,18 @@ say "Current Temp:";
 printf ( "\t%2.4f C\n", $temp );
 printf ( "\t%2.4f F\n", $temp * 1.8 + 32 );
 
-$sensor->write_temp_low($temp);
+$sensor->write_temp_low($temp - 10);
 
-$temp = $sensor->read_temp_low->get;
+my $temp_low = $sensor->read_temp_low->get;
 say "Low Temp:";
-printf ( "\t%2.4f C\n", $temp );
-printf ( "\t%2.4f F\n", $temp * 1.8 + 32 );
+printf ( "\t%2.4f C\n", $temp_low );
+printf ( "\t%2.4f F\n", $temp_low * 1.8 + 32 );
 
-$sensor->write_temp_high($temp);
+$sensor->write_temp_high($temp + 10);
 
-$temp = $sensor->read_temp_high->get;
+my $temp_high = $sensor->read_temp_high->get;
 say "High Temp:";
-printf ( "\t%2.4f C\n", $temp );
-printf ( "\t%2.4f F\n", $temp * 1.8 + 32 );
+printf ( "\t%2.4f C\n", $temp_high );
+printf ( "\t%2.4f F\n", $temp_high * 1.8 + 32 );
 
 
