@@ -28,7 +28,7 @@ my $config = $sensor->read_config->get;
 #say "config changed and F now $config->{F}";
 
 $sensor->change_config(
-    EM => 1,
+    EM => 0,
 )->get;
 
 $config = $sensor->read_config->get;

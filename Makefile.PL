@@ -6,7 +6,6 @@ my $preop =
 WriteMakefile(
     NAME            => 'Device::Chip::TMP102',
     VERSION_FROM    => 'lib/Device/Chip/TMP102.pm',
-
     PREREQ_PM => {
         'Data::Bitfield'                    => '0.02',
 	'Device::Chip'                      => '0.04',
@@ -21,5 +20,13 @@ WriteMakefile(
     dist                => {
 	PREOP => $preop,
     },
-    
+    LICENSE  => 'perl_5',
+    META_MERGE => {
+	resources => {
+	    license     => [ 'http://dev.perl.org/licenses/' ],
+	    repository  => {
+		web  => 'https://github.com/john-/Device-Chip-ADT7470',
+	    },
+	},
+    },
 );
