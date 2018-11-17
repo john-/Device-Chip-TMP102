@@ -120,7 +120,7 @@ sub read_config
 
     $self->cached_read_reg( REG_CONFIG, 1 )->then( sub {
 	my ( $bytes ) = @_;
-	Future->done( $self->{config} = { unpack_CONFIG( unpack "S", $bytes ) } );
+	Future->done( $self->{config} = { unpack_CONFIG( unpack "S<", $bytes ) } );     # TODO : since data size is 16 do I need a "<" ?
     });
 }
 
@@ -142,7 +142,7 @@ sub change_config
 	  my %config = ( %{ $_[0] }, %changes );
 
 	  undef $self->{config}; # invalidate the cache
-	  $self->write_reg( REG_CONFIG, pack "S", pack_CONFIG( %config ) );
+	  $self->write_reg( REG_CONFIG, pack "S<", pack_CONFIG( %config ) );    # TODO: since data size is 16 do I need a "<" ?
 				  });
 }
 
@@ -158,42 +158,36 @@ sub read_temp {
     my $self = shift;
 
     $self->read_reg( REG_TEMP, 1 )->then(
-        sub {  # this code copied from Device::TMP102 by Alex White
-            my ($value) = unpack "s<", $_[0];
+        sub {
+            my ($value) = unpack "s<", $_[0];    # TODO: since data size is 16 do I need a "<" ?
 
-	    my $lsb = ( $value & 0xff00 );
-	    $lsb = $lsb >> 8;
+	    my $lo = ( $value & 0xff00 );
+	    $lo = $lo >> 8;
 
-	    my $msb = $value & 0x00ff;
+	    my $hi = $value & 0x00ff;
 
 	    printf( "results: %04x\n", $value ) if DEBUG;
-	    printf( "msb:     %02x\n", $msb ) if DEBUG;
-	    printf( "lsb:     %02x\n", $lsb ) if DEBUG;
-
-	    my $temp = ( $msb << 8 ) | $lsb;
-
-	    # The TMP102 temperature registers are left justified, correctly
-	    # right justify them
-	    $temp = $temp >> 4;
-
-	    # test for negative numbers
-	    if ( $temp & ( 1 << 11 ) ) {
-
-		# twos compliment plus one, per the docs
-		$temp = ~$temp + 1;
-
-		# keep only our 12 bits
-		$temp &= 0xfff;
-
-		# negative
-		$temp *= -1;
-	    }
-
-	    # convert to a celsius temp value
-	    $temp = $temp / 16;
+	    printf( "msb:     %02x\n", $hi ) if DEBUG;
+	    printf( "lsb:     %02x\n", $lo ) if DEBUG;
 	    
-            Future->done($temp);
-        }
+	    my $negative = ($hi >> 7) == 1;
+
+	    my $shift = 4;
+	    if ($self->{config}{EM}) { $shift = 3 }
+
+	    my $t;
+	    if (!$negative) {
+	        $t = ((($hi * 256) + $lo) >> $shift) * 0.0625;
+	    } else {
+		my $remove_bit = 0b011111111111;
+		if ($self->{config}{EM}) { $remove_bit = 0b0111111111111; }
+		my $ti = ((($hi * 256) + $lo) >> $shift);
+		# Complement, but remove the first bit.
+		$ti = ~$ti & $remove_bit;
+		$t = -(($ti+1) * 0.0625); # TODO:  Maybe off by one needs to be fixed elsewhere
+	    }
+            Future->done($t);
+	}
     );
 }
 

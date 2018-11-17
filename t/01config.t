@@ -38,14 +38,14 @@ $chip->mount(
 }
 
 # ->change_config
-#{
-#   $adapter->expect_write( "\x01\xA1" );#
+{
+   $adapter->expect_write( "\x01\x60\xB0" );
 
-#   $chip->change_config(
-#      EM => 1,
-#   )->get;
+   $chip->change_config(
+      EM => 1,
+   )->get;
 
-#   $adapter->check_and_clear( '$chip->change_config' );
-#}
+   $adapter->check_and_clear( '$chip->change_config' );
+}
 
 done_testing;
