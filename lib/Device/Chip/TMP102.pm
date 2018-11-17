@@ -81,6 +81,8 @@ L<Future> instances.
 use constant {
     REG_TEMP   => 0x00,    # R
     REG_CONFIG => 0x01,    # R/W
+    REG_T_LOW  => 0x02,    # R/W
+    REG_T_HIGH => 0x03,    # R/W
 };
 
 bitfield CONFIG =>
@@ -161,34 +163,90 @@ sub read_temp {
         sub {
             my ($value) = unpack "s<", $_[0];    # TODO: since data size is 16 do I need a "<" ?
 
-	    my $lo = ( $value & 0xff00 );
-	    $lo = $lo >> 8;
-
-	    my $hi = $value & 0x00ff;
-
-	    printf( "results: %04x\n", $value ) if DEBUG;
-	    printf( "msb:     %02x\n", $hi ) if DEBUG;
-	    printf( "lsb:     %02x\n", $lo ) if DEBUG;
-	    
-	    my $negative = ($hi >> 7) == 1;
-
-	    my $shift = 4;
-	    if ($self->{config}{EM}) { $shift = 3 }
-
-	    my $t;
-	    if (!$negative) {
-	        $t = ((($hi * 256) + $lo) >> $shift) * 0.0625;
-	    } else {
-		my $remove_bit = 0b011111111111;
-		if ($self->{config}{EM}) { $remove_bit = 0b0111111111111; }
-		my $ti = ((($hi * 256) + $lo) >> $shift);
-		# Complement, but remove the first bit.
-		$ti = ~$ti & $remove_bit;
-		$t = -(($ti+1) * 0.0625); # TODO:  Maybe off by one needs to be fixed elsewhere
-	    }
-            Future->done($t);
+            Future->done($self->_bytes_to_temp($value));
 	}
     );
+}
+
+sub write_temp_low {
+    my ($self, $temp) = @_;
+
+    $self->write_reg( REG_T_LOW, pack "s>", $self->_temp_to_bytes($temp) );
+}
+
+sub read_temp_low {
+    my $self = shift;
+
+    $self->read_reg( REG_T_LOW, 1 )->then(
+        sub {
+            my ($value) = unpack "s<", $_[0];    # TODO: since data size is 16 do I need a "<" ?
+            Future->done($self->_bytes_to_temp($value));
+        }
+    );
+}
+
+sub write_temp_high {
+    my ($self, $temp) = @_;
+
+    $self->write_reg( REG_T_HIGH, pack "s>", $self->_temp_to_bytes($temp) );
+}
+
+sub read_temp_high {
+    my $self = shift;
+
+    $self->read_reg( REG_T_HIGH, 1 )->then(
+        sub {
+            my ($value) = unpack "s<", $_[0];    # TODO: since data size is 16 do I need a "<" ?
+            Future->done($self->_bytes_to_temp($value));
+        }
+    );
+}
+
+sub _bytes_to_temp {
+    my ($self, $value) = @_;
+
+    my $lo = ( $value & 0xff00 );
+    $lo = $lo >> 8;
+
+    my $hi = $value & 0x00ff;
+
+    printf( "results: %04x\n", $value ) if DEBUG;
+    printf( "msb:     %02x\n", $hi ) if DEBUG;
+    printf( "lsb:     %02x\n", $lo ) if DEBUG;
+
+    my $negative = ($hi >> 7) == 1;
+
+    my $shift = 4;
+    if ($self->{config}{EM}) { $shift = 3 }
+
+    my $t;
+    if (!$negative) {
+	$t = ((($hi * 256) + $lo) >> $shift) * 0.0625;
+    } else {
+	my $remove_bit = 0b011111111111;
+	if ($self->{config}{EM}) { $remove_bit = 0b0111111111111; }
+	my $ti = ((($hi * 256) + $lo) >> $shift);
+	# Complement, but remove the first bit.
+	$ti = ~$ti & $remove_bit;
+	$t = -(($ti+1) * 0.0625); # TODO:  Maybe off by one needs to be fixed elsewhere
+    }
+    return $t;
+}
+
+sub _temp_to_bytes {
+    my ($self, $temp) = @_;
+
+    my $shift = 4;
+    if ($self->{config}{EM}) { $shift = 3 }
+
+    my $t;
+    if ($temp >= 0) {
+        $t = int($temp / 0.0625) << $shift;
+    } else {
+	$t = int(abs($temp) / 0.0625) << $shift;
+	$t = ~$t;
+    }
+    return $t
 }
 
 0x55AA;

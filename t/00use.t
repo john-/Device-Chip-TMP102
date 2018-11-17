@@ -5,6 +5,6 @@ use warnings;
 
 use Test::More;
 
-use_ok( 'Device::Chip::TMP102' );
+use_ok('Device::Chip::TMP102');
 
 done_testing;
