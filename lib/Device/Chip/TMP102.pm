@@ -159,18 +159,20 @@ Returns the temperature in degrees Celsius.
 sub read_temp {
     my $self = shift;
 
-    $self->read_reg( REG_TEMP, 1 )->then(
-        sub {
-            my ($value) = unpack "s<", $_[0];    # TODO: since data size is 16 do I need a "<" ?
+    Future->needs_all(
+        $self->read_reg( REG_TEMP, 1 ),
+        ( $self->{config} ? Future->done( $self->{config} ) :
+	                    $self->read_config ),
+    )->then( sub {
+        my ( $value, $config ) = @_;
 
-            Future->done($self->_bytes_to_temp($value));
-	}
-    );
+        Future->done($self->_bytes_to_temp(unpack "s<", $value));
+    });
 }
 
 =head2 write_temp_low
 
-   $chip->read_temp_low( $temp )->get
+   $chip->write_temp_low( $temp )->get
 
 Changes the low temperature threshold in degrees Celsius.
 
@@ -193,12 +195,15 @@ Returns the low temperature threshold in degrees Celsius.
 sub read_temp_low {
     my $self = shift;
 
-    $self->read_reg( REG_T_LOW, 1 )->then(
-        sub {
-            my ($value) = unpack "s<", $_[0];    # TODO: since data size is 16 do I need a "<" ?
-            Future->done($self->_bytes_to_temp($value));
-        }
-    );
+    Future->needs_all(
+        $self->read_reg( REG_T_LOW, 1 ),
+        ( $self->{config} ? Future->done( $self->{config} ) :
+	                    $self->read_config ),
+    )->then( sub {
+        my ( $value, $config ) = @_;
+
+        Future->done($self->_bytes_to_temp(unpack "s<", $value));
+    });
 }
 
 =head2 write_temp_high
@@ -226,12 +231,15 @@ Returns the high temperature threshold in degrees Celsius.
 sub read_temp_high {
     my $self = shift;
 
-    $self->read_reg( REG_T_HIGH, 1 )->then(
-        sub {
-            my ($value) = unpack "s<", $_[0];    # TODO: since data size is 16 do I need a "<" ?
-            Future->done($self->_bytes_to_temp($value));
-        }
-    );
+    Future->needs_all(
+        $self->read_reg( REG_T_HIGH, 1 ),
+        ( $self->{config} ? Future->done( $self->{config} ) :
+	                    $self->read_config ),
+    )->then( sub {
+        my ( $value, $config ) = @_;
+
+        Future->done($self->_bytes_to_temp(unpack "s<", $value));
+    });
 }
 
 sub _bytes_to_temp {
@@ -242,27 +250,26 @@ sub _bytes_to_temp {
 
     my $hi = $value & 0x00ff;
 
-    printf( "results: %04x\n", $value ) if DEBUG;
-    printf( "msb:     %02x\n", $hi ) if DEBUG;
-    printf( "lsb:     %02x\n", $lo ) if DEBUG;
+    my $hilo = $hi*256+$lo;   # data is read little endian so swap bytes
+    #my $value2 = ( $hi << 8 ) | $lo;
 
-    my $negative = ($hi >> 7) == 1;
+    printf( "res <  : %04x\n", $value ) if DEBUG;
+    printf( "hi:      %02x\n", $hi ) if DEBUG;
+    printf( "lo:      %02x\n", $lo ) if DEBUG;
+    printf( "res >  : %04x\n", $hilo) if DEBUG;
 
     my $shift = 4;
     if ($self->{config}{EM}) { $shift = 3 }
 
-    my $t;
-    if (!$negative) {
-	$t = ((($hi * 256) + $lo) >> $shift) * 0.0625;
-    } else {
-	my $remove_bit = 0b011111111111;
-	if ($self->{config}{EM}) { $remove_bit = 0b0111111111111; }
-	my $ti = ((($hi * 256) + $lo) >> $shift);
-	# Complement, but remove the first bit.
-	$ti = ~$ti & $remove_bit;
-	$t = -(($ti+1) * 0.0625); # TODO:  Maybe off by one needs to be fixed elsewhere
+    my $t = $hilo >> $shift;
+
+    if (($hi | 0x7F) == 0xFF) { # negative temperature
+	$t = ~$t +1;
+	$t &= 0xFFF;
+	$t *= -1;
     }
-    return $t;
+
+    return $t * 0.0625;
 }
 
 sub _temp_to_bytes {
@@ -271,12 +278,11 @@ sub _temp_to_bytes {
     my $shift = 4;
     if ($self->{config}{EM}) { $shift = 3 }
 
-    my $t;
-    if ($temp >= 0) {
-        $t = int($temp / 0.0625) << $shift;
-    } else {
-	$t = int(abs($temp) / 0.0625) << $shift;
-	$t = ~$t;
+    my $t = int(abs($temp)/0.0625) << $shift;
+
+    if ($temp < 0) {
+        $t = ~$t + 1;
+	$t &= 0xFFFF;
     }
     return $t
 }

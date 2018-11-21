@@ -6,6 +6,7 @@ LICENSE
 MANIFEST			This list of files
 t/00use.t
 t/01config.t
-t/02interact.t
+t/02standard.t
+t/03extended.t
 t/99pod.t
 README.pod

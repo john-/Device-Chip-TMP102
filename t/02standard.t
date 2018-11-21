@@ -17,6 +17,15 @@ $chip->mount( my $adapter = Test::Device::Chip::Adapter->new, )->get;
 
 # ->read_temp
 {
+    $adapter->expect_write_then_read( "\x01", 2 )->returns("\x60\xA0");  # config read first test
+
+    my $config = $chip->read_config->get;
+    is( # Extended mode off
+	$config->{EM},
+	'',
+	'->read_config set extended mode'
+    );
+
     $adapter->expect_write_then_read( "\x00", 2 )->returns("\x1C\x00");
 
     is( $chip->read_temp->get, 28.0, '->read_temp result' );
@@ -32,6 +41,25 @@ $chip->mount( my $adapter = Test::Device::Chip::Adapter->new, )->get;
 
     $adapter->check_and_clear('->read_temp (max)');
 }
+
+# ->read_temp (80)
+{
+    $adapter->expect_write_then_read( "\x00", 2 )->returns("\x50\x00");
+
+    is( $chip->read_temp->get, 80, '->read_temp 80 result' );
+
+    $adapter->check_and_clear('->read_temp (80)');
+}
+
+# ->read_temp (50)
+{
+    $adapter->expect_write_then_read( "\x00", 2 )->returns("\x32\x00");
+
+    is( $chip->read_temp->get, 50, '->read_temp 50 result' );
+
+    $adapter->check_and_clear('->read_temp (50)');
+}
+
 
 # ->read_temp (zero)
 {
@@ -74,7 +102,7 @@ $chip->mount( my $adapter = Test::Device::Chip::Adapter->new, )->get;
     $adapter->expect_write("\x02\x1C\x00");
 
     is( $chip->write_temp_low(28.0)->get, undef, '->write_temp_low result' );
-
+ 
     $adapter->check_and_clear('->write_temp_low');
 }
 
