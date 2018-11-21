@@ -16,7 +16,7 @@ use constant DEBUG => 0;
 
 use utf8;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use Data::Bitfield qw( bitfield boolfield enumfield );
 
@@ -24,7 +24,7 @@ use Data::Bitfield qw( bitfield boolfield enumfield );
 
 =head1 NAME
 
-C<Device::Chip::TMP102> - chip driver for an F<TMP102>
+C<Device::Chip::TMP102> - chip driver for a F<TMP102>
 
 =head1 SYNOPSIS
 
@@ -40,7 +40,7 @@ C<Device::Chip::TMP102> - chip driver for an F<TMP102>
 This L<Device::Chip> subclass provides specific communication to a
 F<Texas Instruments> F<TMP102> attached to a computer via an I²C adapter.
 
-Only a subset of the chip's capabilities are currently accessible through this driver.
+Not all of the chip's capabilities are currently accessible through this driver.  Extended mode is supported.
 
 The reader is presumed to be familiar with the general operation of this chip;
 the documentation here will not attempt to explain or define chip-specific
@@ -251,7 +251,6 @@ sub _bytes_to_temp {
     my $hi = $value & 0x00ff;
 
     my $hilo = $hi*256+$lo;   # data is read little endian so swap bytes
-    #my $value2 = ( $hi << 8 ) | $lo;
 
     printf( "res <  : %04x\n", $value ) if DEBUG;
     printf( "hi:      %02x\n", $hi ) if DEBUG;

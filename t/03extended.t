@@ -4,7 +4,6 @@ use strict;
 use warnings;
 
 use Test::More;
-use Test::Exception;
 use Test::Device::Chip::Adapter;
 
 use Device::Chip::TMP102;

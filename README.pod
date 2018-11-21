@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-C<Device::Chip::TMP102> - chip driver for an F<TMP102>
+C<Device::Chip::TMP102> - chip driver for a F<TMP102>
 
 =head1 SYNOPSIS
 
@@ -18,7 +18,7 @@ C<Device::Chip::TMP102> - chip driver for an F<TMP102>
 This L<Device::Chip> subclass provides specific communication to a
 F<Texas Instruments> F<TMP102> attached to a computer via an I²C adapter.
 
-Only a subset of the chip's capabilities are currently accessible through this driver.
+Not all of the chip's capabilities are currently accessible through this driver.  Extended mode is supported.
 
 The reader is presumed to be familiar with the general operation of this chip;
 the documentation here will not attempt to explain or define chip-specific

@@ -22,10 +22,13 @@ WriteMakefile(
     },
     LICENSE  => 'perl_5',
     META_MERGE => {
+	'meta-spec' => { version => 2 },
 	resources => {
 	    license     => [ 'http://dev.perl.org/licenses/' ],
 	    repository  => {
-		web  => 'https://github.com/john-/Device-Chip-ADT7470',
+                type => 'git',
+		url  => 'https://github.com/john-/Device-Chip-TMP102.git',
+		web  => 'https://github.com/john-/Device-Chip-TMP102',
 	    },
 	},
     },
