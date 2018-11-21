@@ -4,12 +4,9 @@ use strict;
 use warnings;
 
 use Device::Chip::Adapter;
-use FindBin::libs;
 use Device::Chip::TMP102;
 
 use feature 'say';
-
-use Data::Dumper;
 
 my $ADAPTER     = "LinuxKernel";
 my $MOUNTPARAMS = 'bus=/dev/i2c-1,addr=0x48';

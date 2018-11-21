@@ -85,7 +85,7 @@ Returns the temperature in degrees Celsius.
 
 =head2 write_temp_low
 
-   $chip->read_temp_low( $temp )->get
+   $chip->write_temp_low( $temp )->get
 
 Changes the low temperature threshold in degrees Celsius.
 

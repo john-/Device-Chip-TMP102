@@ -122,7 +122,7 @@ sub read_config
 
     $self->cached_read_reg( REG_CONFIG, 1 )->then( sub {
 	my ( $bytes ) = @_;
-	Future->done( $self->{config} = { unpack_CONFIG( unpack "S<", $bytes ) } );     # TODO : since data size is 16 do I need a "<" ?
+	Future->done( $self->{config} = { unpack_CONFIG( unpack "S<", $bytes ) } );
     });
 }
 
@@ -144,7 +144,7 @@ sub change_config
 	  my %config = ( %{ $_[0] }, %changes );
 
 	  undef $self->{config}; # invalidate the cache
-	  $self->write_reg( REG_CONFIG, pack "S<", pack_CONFIG( %config ) );    # TODO: since data size is 16 do I need a "<" ?
+	  $self->write_reg( REG_CONFIG, pack "S<", pack_CONFIG( %config ) );
 				  });
 }
 
